@@ -1,0 +1,310 @@
+esphome:
+  name: living-room-av
+  friendly_name: living_room_av
+  on_boot:
+    - priority: -100
+      then:
+        - button.press: slink_reset
+
+esp8266:
+  board: d1_mini
+# Available D3, D2, D1
+
+external_components:
+  - source: github://eigger/espcomponents/releases/latest
+    components: [ uartex ]
+    refresh: always
+
+# Enable logging
+logger:
+  level: DEBUG
+  hardware_uart: UART1
+
+# Enable Home Assistant API
+api:
+#  encryption:
+#    key: "q/KeuSTAa5SDevXgaPgo2LJlvAM4O3f1B8UAzG92btM="
+
+  services:
+    - service: remote_nec
+      variables: 
+        address: int
+        command: int
+      then:
+      - remote_transmitter.transmit_nec:
+          address: !lambda 'return address;'
+          command: !lambda 'return command;'
+    - service: remote_pioneer
+      variables:
+        rc_code_1: int
+      then:
+      - remote_transmitter.transmit_pioneer:
+          rc_code_1: !lambda 'return rc_code_1;'
+    - service: cdp09
+      variables:
+        command: string
+      then:
+        - logger.log: "Service call received"
+        - uart.write:
+            id: s_link
+            data: !lambda |-
+              std::uint8_t i;
+              std::string command_str = command;
+              std::vector<uint8_t> commandBytes {0x90};
+              for (i = 0; i < command_str.length() / 2; ++i) {
+                std::string hexByte = command_str.substr(2 * i, 2);
+                commandBytes.push_back(strtol(hexByte.c_str(), NULL, 16));
+              }
+              commandBytes.push_back(0x0A);
+              return commandBytes;
+
+
+ota:
+  - platform: esphome
+    password: "PWD"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  manual_ip:
+    static_ip: xxx.xxx.xxx.xxx
+    gateway: yyy.yyy.yyy.yyy
+    subnet: zzz.zzz.zzz.zzz
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Living-Room-Av Fallback Hotspot"
+    password: "PWD"
+
+captive_portal:
+
+output:
+  - platform: gpio
+    pin:
+      number: D3
+      inverted: true
+    id: arduino_reset
+
+uart:
+  tx_pin: GPIO01
+  rx_pin: GPIO03
+  baud_rate: 9600
+  id: s_link
+  debug:
+    direction: BOTH
+    dummy_receiver: false
+    after:
+      delimiter: [0x0A]
+
+uartex:
+  rx_timeout: 100ms
+  tx_delay: 50ms
+  tx_timeout: 100ms
+  tx_retry_cnt: 3
+  rx_header: [0x98]
+  rx_footer: [0x0A]
+  tx_header: [0x90]
+  tx_footer: [0x0A]
+
+switch:
+  - platform: gpio
+    pin: D0
+    inverted: True
+    id: power_conditioner_switch
+    name: "Living Room Power Conditioner Switch"
+    icon: "mdi:power-plug"
+    restore_mode: RESTORE_DEFAULT_OFF 
+
+binary_sensor:
+  - platform: gpio
+    pin: D6
+    id: yamaha_receiver_status
+    name: "Yamaha Receiver Power Status"
+    device_class: power
+    icon: "mdi:amplifier"
+  - platform: gpio
+    pin: D5
+    id: tv_status
+    name: "TV Power Status"
+    device_class: power
+    icon: "mdi:television"
+  - platform: homeassistant
+    name: "TV status"
+    entity_id: media_player.samsung_6_series_55
+    id: living_room_av_tv_status
+    icon: "mdi:television"
+  - platform: uartex
+    id: cd_power
+    name: "CD Power Status"
+    device_class: power
+    icon: "mdi:disc-player"
+    state_on:
+      offset: 0
+      data: [0x2E]
+    state_off:
+      offset: 0
+      data: [0x2F]
+
+sensor:
+  - platform: wifi_signal
+    id: living_room_av_wifi
+    name: "Living Room AV - WiFi Signal"
+    update_interval: 60s  
+  - platform: uartex
+    name: "CD Loaded"
+    id: cd_loaded
+    icon: "mdi:disc"
+    state: [0x58]
+    state_number:
+      offset: 1
+      length: 1
+      precision: 0
+  - platform: uartex
+    name: "CD Playing"
+    id: cd_playing
+    icon: "mdi:disc"
+    state: [0x50]
+    state_number:
+      offset: 1
+      length: 1
+      precision: 0
+  - platform: uartex
+    name: "Playing Track"
+    id: track_playing
+    icon: "mdi:file-music-outline"
+    state: [0x50]
+    state_number: !lambda |-
+                div_t track_num = div(data[2], 16);
+                return track_num.quot * 10 + track_num.rem;
+    on_value:           #Trigger verbose mode when playing
+      then:
+        - if:
+            condition:
+              lambda: 'return id(cd_status).state == "Playing" || id(cd_status).state == "Paused";'
+            then:
+              - uart.write: [0x90, 0x25, 0x0A]
+  - platform: uartex
+    name: "Track Length [s]"
+    id: track_len
+    icon: "mdi:clock-time-two-outline"
+    state: [0x50]
+    state_number: !lambda |-
+                div_t minutes = div(data[3], 16);
+                div_t seconds = div(data[4], 16);
+                return seconds.quot * 10 + seconds.rem + (minutes.quot * 10 + minutes.rem) * 60;
+  - platform: uartex
+    name: "Track Positon [s]"
+    id: track_pos
+    icon: "mdi:av-timer"
+    state: [0x51]
+    state_number: !lambda |-
+                div_t minutes = div(data[3], 16);
+                div_t seconds = div(data[4], 16);
+                return seconds.quot * 10 + seconds.rem + (minutes.quot * 10 + minutes.rem) * 60;
+
+remote_transmitter:
+    pin: 
+      number: D7
+      inverted: True
+    carrier_duty_percent: 50%
+
+text_sensor:
+  - platform: uartex
+    name: "CD Status"
+    id: cd_status
+    icon: "mdi:list-status"
+    lambda: |-
+      if (data[0] == 0x00) return "Playing";
+      if (data[0] == 0x01) return "Stopped";
+      if (data[0] == 0x02) return "Paused";
+      if (data[0] == 0x05) return "No Disc";
+      if (data[0] == 0x06) return "Changing disk";
+      if (data[0] == 0x08) return "Ready";
+      if (data[0] == 0x09) return "Start of track";
+      if (data[0] == 0x0E) return "Duplicate Command";
+      if (data[0] == 0x0F) return "Error";
+      if (data[0] == 0x14) return "Disc Not Loaded";
+      if (data[0] == 0x15) return "Track Not Available";
+      if (data[0] == 0x18) return "Door Open";
+      if (data[0] == 0x2F) return "Off";
+      return id(cd_status).state;
+    on_value:
+      then:
+        - if:
+            condition:
+              lambda: 'return id(cd_status).state != "Playing" && id(cd_status).state != "Paused";'
+            then:
+              - lambda: 'id(cd_playing).publish_state(0);'
+              - lambda: 'id(track_playing).publish_state(0);'
+              - lambda: 'id(track_len).publish_state(0);'
+              - lambda: 'id(track_pos).publish_state(0);'
+
+remote_receiver:
+  pin:
+    number: D4
+    inverted: true
+    mode:
+      input: true
+      pullup: true
+  dump: nec
+  on_nec:
+    then:
+    - logger.log: "Power button pressed"
+    - if:
+        condition:
+          and:
+            - lambda: 'return (x.address == 0x2510);'  # Power on
+            - lambda: 'return (x.command == 0xB24D);'  # Power on
+        then:
+          - delay: 0.5s
+          - if:
+              condition:
+                - lambda: 'return id(living_room_av_tv_status).state;'
+              then:
+                - logger.log: "TV on exeuting off script"
+                - homeassistant.action:
+                    action: script.1706233636337
+              else:
+                - logger.log: "TV off exeuting on script"
+                - homeassistant.action:
+                    action: script.1706229720250
+    - if:
+        condition:
+          and:
+            - lambda: 'return (x.address == 0x2510);'  # Volume Up
+            - lambda: 'return (x.command == 0xF40B);'  # Volume Up
+        then:
+          - delay: 0.5s
+          - remote_transmitter.transmit_nec:
+              address: 0x857A
+              command: 0xE51A
+    - if:
+        condition:
+          and:
+            - lambda: 'return (x.address == 0x2510);'  # Volume Down
+            - lambda: 'return (x.command == 0xF20D);'  # Volume Down
+        then:
+          - delay: 0.5s
+          - remote_transmitter.transmit_nec:
+              address: 0x857A
+              command: 0xE41B
+    - if:
+        condition:
+          and:
+            - lambda: 'return (x.address == 0x2510);'  # Mute
+            - lambda: 'return (x.command == 0xBC43);'  # Mute
+        then:
+          - delay: 0.5s
+          - remote_transmitter.transmit_nec:
+              address: 0x857A
+              command: 0xE31C
+
+button:
+  - platform: restart
+    id: reboot
+    name: "Living Room AV Restart"
+  - platform: output
+    name: "S-Link Reset"
+    id: slink_reset
+    output: arduino_reset
+    duration: 500ms

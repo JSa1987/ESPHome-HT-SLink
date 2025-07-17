@@ -12,7 +12,7 @@ This is an ESPHome controller I made to fully control my home theather setup fro
 An Arduino Pro Mini is used as intrface for the Sony S-Link Bus. The arduino is interfaced with the ESP8622 via a serial connection.
 The Arduino sketch is entirely based on the great work from [robho](https://github.com/robho/sony_slink). The only change is that the modified code allows the option of communicating over serial using raw Hex bytes. This is achieved by defining the 'HexOutput' option at the beginning of the code (if this is not defined the code behaves as the original code). 
 
-I'm sucessfully using this setup to control and read information from a Sony CDP-CX225 CD Player.
+I'm sucessfully using this setup to control and read information from a Sony CDP-CX225 CD Player. The ESPHome yaml file with the configuration for this device is available in the 'ESPHme' folder. 
 
 ## Hardware
 To physically connect the Arduino to the Sony via the S-Link bus and the ESP8266 to the other devices (e.g. IR blaster, Power Conditioner etc.) some additional components are needed. See schematic below.
@@ -29,6 +29,41 @@ The ESPHome device exposes a service that is then called from Home Assistant to 
 For each device on the S-Link bus specific sensor will need to be defined in the ESPHome yaml configuration file. See the link to www.undeadscientist.com the expected responses from S-Link devices.
 
 ### Setup for Sony CDP-CX225
+The following template sensors are to be defined in the `configuration.yaml` file:
+- cdp_album => This will reflect the title of the CD loaded.
+- cdp_artist => This will reflect the artist of the track playing
+- cdp_track_title => This will reflect the title of the track playing
+- cdp_bar => This will reflect the current position of in the track playing as precentage of the track duration. 
+```
+template:
+  - sensor:
+      - name: "CD Album"
+        unique_id: cdp_album
+        state: |
+          {% from "cdp_cd_list.jinja" import cdp_cd_list %}
+          {{ cdp_cd_list.cd[(states("sensor.living_room_av_cd_playing")|int)-1].Album}}
+  - sensor:
+      - name: "CD Artist"
+        unique_id: cdp_artist
+        state: |
+          {% from "cdp_cd_list.jinja" import cdp_cd_list %}
+          {{ cdp_cd_list.cd[(states("sensor.living_room_av_cd_playing")|int)-1].Artist}}
+  - sensor:
+      - name: "CD Track Title"
+        unique_id: cdp_track_title
+        state: |
+          {% from "cdp_cd_list.jinja" import cdp_cd_list %}
+          {{ cdp_cd_list.cd[(states("sensor.living_room_av_cd_playing")|int)-1].Tracks[(states("sensor.living_room_av_playing_track")|int)-1]}}
+  - number:
+      - name: "CDP Track bar"
+        unique_id: cdp_bar
+        state: '{{ ((states("sensor.living_room_av_track_positon_s")|int) / (states("sensor.living_room_av_track_length_s")|int) * 100)|int}}'
+        step: 1
+        set_value: 
+          - service: script.av_cdp_jumptime
+            data:
+              jump_to: "{{ value }}"
+```
 
 ### Card for Sony CDP-CX225
 

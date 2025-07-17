@@ -1,10 +1,20 @@
-sony_slink
-==========
+# ESPHome Home Theather Controller with Sony S-Link support
 
-This Arduino sketch is entirely based on the great work from [robho](https://github.com/robho/sony_slink). The only change is that the modified code allows the option of communicating over serial using raw Hex bytes. This is achieved by defining the 'HexOutput' option at the beginning of the code (if this is not defined the code behaves as the original code). 
+This is an ESPHome controller I made to fully control my home theather setup from Home Assistant. This contorller include includes the following input/outputs that suit my needs, but can be easyly be modified for different setups.
+- Sony S-Link Input/Output - Used to controll a Sony CDP-CX225 CD Player
+- IR Input - Used to detect ON/OFF and Volume commands from a Roku remote
+- IR Output - Used to controll a Yamaha RX-V2700 receiver and a daisy chained IR blaster
+- ON/OFF Output (5v) - Used to controll a power conditioner (completly turn off the power to the whole setup)
+- 12v ON/OFF Input - Used to detect the ON/OFF status of the Yamaha RX-V2700 receiver
+- 5v ON/OFF Input- Used to detect the ON/OFF status of the TV (connected to a USB port of the TV)
 
-I'm using this to control and read information from a Sony CDP-CX225 CD Player, and interfacing this with ESPHome using a ESP8266.
+## Sony S-Link
+An Arduino Pro Mini is used as intrface for the Sony S-Link Bus. The arduino is interfaced with the ESP8622 via a serial connection.
+The Arduino sketch is entirely based on the great work from [robho](https://github.com/robho/sony_slink). The only change is that the modified code allows the option of communicating over serial using raw Hex bytes. This is achieved by defining the 'HexOutput' option at the beginning of the code (if this is not defined the code behaves as the original code). 
 
+I'm sucessfully using this setup to control and read information from a Sony CDP-CX225 CD Player.
+
+## Hardware
 To physically connect the Arduino to the Sony via the S-Link bus and to the ESP8266 running ESPHome you need some additional components, below is the schematic.
 ![circuit](circuit.png)
 
@@ -16,7 +26,7 @@ The S-Link_CDP-CX225.ods file in the 'Supported Commands' folder lists the comma
 
 ----
 
-Reference documents:
+## Reference documents:
 * http://web.archive.org/web/20070720171202/http://www.reza.net/slink/text.txt
 * http://web.archive.org/web/20070705130320/http://www.undeadscientist.com/slink/
 * http://web.archive.org/web/20180831072659/http://boehmel.de/slink.htm

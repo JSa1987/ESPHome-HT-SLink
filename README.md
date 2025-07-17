@@ -15,14 +15,26 @@ The Arduino sketch is entirely based on the great work from [robho](https://gith
 I'm sucessfully using this setup to control and read information from a Sony CDP-CX225 CD Player.
 
 ## Hardware
-To physically connect the Arduino to the Sony via the S-Link bus and to the ESP8266 running ESPHome you need some additional components, below is the schematic.
-![circuit](circuit.png)
+To physically connect the Arduino to the Sony via the S-Link bus and the ESP8266 to the other devices (e.g. IR blaster, Power Conditioner etc.) some additional components are needed. See schematic below.
+![circuit](Schematics/Circuit.png)
 
 The S-Link bus opeartes at a 5v logic level, while the ESP8266 operates at a 3.3v logic level. For Arduino boards there are options that operate either at 3.3v or 5v, therefore the circuit will depend on the type of Arduino board used. The schematics above uses an the 3.3v version of the Arduino Pro Mini, therefore the Arduino can be connected directly to the ESP8266 but R2 and R3 are needed. If an Arduino that operates at 5v logic level is used (e.g. Arduino Nano) then R2 and R3 are not needed but a logic level shifter is instead needed between the Arduino and the ESP8266.
 
-A 3.5 mm mono plug shall be used to connect the circuit to the S-Link/Control A1 port of the Sony device.
+For the Sony S-Link interface a 3.5 mm mono plug shall be used to connect the circuit to the S-Link/Control A1 port of the Sony device.
+A 3.5 mm mono plug would be used also to connect to most IR blasers and IR input on receivers, the signal goes on the mono plug tip and the ground on the sleeve.
 
-The S-Link_CDP-CX225.ods file in the 'Supported Commands' folder lists the commands I have found work with the CDP-CX225.
+## Home Assistant interface
+### Entities
+The ESPHome device exposes a service that is then called from Home Assistant to control the S-Link devices. The command to be sent over S-Link is provided as parameter when calling the service. See the link to www.undeadscientist.com below for the known S-Link commands.
+For each device on the S-Link bus specific sensor will need to be defined in the ESPHome yaml configuration file. See the link to www.undeadscientist.com the expected responses from S-Link devices.
+
+### Setup for Sony CDP-CX225
+
+### Card for Sony CDP-CX225
+
+## Additional resources
+The S-Link_CDP-CX225.xlxs file in the 'SLink Supported Commands' folder lists the commands I have found work with the CDP-CX225.
+The ESPHome yaml configuration file I use for my setup is provided as reference in the 'ESPHme' folder. The [UARTX custom component form eigger](https://github.com/eigger/espcomponents) is used to interface with the Arduino managing the S-Link bus.
 
 ----
 

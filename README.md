@@ -1,6 +1,6 @@
 # ESPHome Home Theather Controller with Sony S-Link support
 
-This is an ESPHome controller I made to fully control my home theather setup from Home Assistant. This contorller include includes the following input/outputs that suit my needs, but can be easyly be modified for different setups.
+This is an ESPHome controller I made to fully control my home theather setup from Home Assistant. This contorller includes the following input/outputs that suit my needs, but can be easyly be modified for different setups.
 - Sony S-Link Input/Output - Used to controll a Sony CDP-CX225 CD Player
 - IR Input - Used to detect ON/OFF and Volume commands from a Roku remote
 - IR Output - Used to controll a Yamaha RX-V2700 receiver and a daisy chained IR blaster
@@ -10,23 +10,27 @@ This is an ESPHome controller I made to fully control my home theather setup fro
 
 ## Sony S-Link
 An Arduino Pro Mini is used as intrface for the Sony S-Link Bus. The arduino is interfaced with the ESP8622 via a serial connection.
-The Arduino sketch is entirely based on the great work from [robho](https://github.com/robho/sony_slink). The only change is that the modified code allows the option of communicating over serial using raw Hex bytes. This is achieved by defining the 'HexOutput' option at the beginning of the code (if this is not defined the code behaves as the original code). 
+The Arduino sketch (in the 'Arduino Sketch' folder) is entirely based on the great work from [robho](https://github.com/robho/sony_slink). The only change is that the modified code allows the option of communicating over serial using raw Hex bytes. This is achieved by defining the 'HexOutput' option at the beginning of the code (if this is not defined the code behaves as the original code). 
 
-I'm sucessfully using this setup to control and read information from a Sony CDP-CX225 CD Player. The ESPHome yaml file with the configuration for this device is available in the 'ESPHme' folder. 
+I'm sucessfully using this setup to control and read information from a Sony CDP-CX225 CD Player. The ESPHome yaml file with the configuration for this device is available in the 'ESPHome' folder. 
 
 ## Hardware
-To physically connect the Arduino to the Sony via the S-Link bus and the ESP8266 to the other devices (e.g. IR blaster, Power Conditioner etc.) some additional components are needed. See schematic below.
+To physically connect the Arduino to a Sony device via the S-Link bus and the ESP8266 to the other devices (e.g. IR blaster, Power Conditioner etc.) some additional components are needed. See schematic below.
 ![circuit](Schematics/Circuit.png)
 
-The S-Link bus opeartes at a 5v logic level, while the ESP8266 operates at a 3.3v logic level. For Arduino boards there are options that operate either at 3.3v or 5v, therefore the circuit will depend on the type of Arduino board used. The schematics above uses an the 3.3v version of the Arduino Pro Mini, therefore the Arduino can be connected directly to the ESP8266 but R2 and R3 are needed. If an Arduino that operates at 5v logic level is used (e.g. Arduino Nano) then R2 and R3 are not needed but a logic level shifter is instead needed between the Arduino and the ESP8266.
+The S-Link bus opeartes at a 5v logic level, while the ESP8266 operates at a 3.3v logic level. There are Arduino boards that operate either at 3.3v or at 5v, therefore the circuit will depend on the type of Arduino board used. The schematics above uses an the 3.3v version of the Arduino Pro Mini, therefore the Arduino can be connected directly to the ESP8266 but R2 and R3 are needed as voltage divider on the S-Link line. If an Arduino that operates at 5v logic level is used instead (e.g. Arduino Nano) then R2 and R3 won't be needed but a logic level shifter is instead needed between the Arduino and the ESP8266.
 
 For the Sony S-Link interface a 3.5 mm mono plug shall be used to connect the circuit to the S-Link/Control A1 port of the Sony device.
-A 3.5 mm mono plug would be used also to connect to most IR blasers and IR input on receivers, the signal goes on the mono plug tip and the ground on the sleeve.
+A 3.5 mm mono plug would be used also to connect to most IR blasers and IR input ports on receivers, the signal goes on the mono plug tip and the ground on the sleeve.
 
 ## Home Assistant interface
 ### Entities
-The ESPHome device exposes a service that is then called from Home Assistant to control the S-Link devices. The command to be sent over S-Link is provided as parameter when calling the service. See the link to www.undeadscientist.com below for the known S-Link commands.
-For each device on the S-Link bus specific sensor will need to be defined in the ESPHome yaml configuration file. See the link to www.undeadscientist.com the expected responses from S-Link devices.
+The ESPHome device exposes the folloeing services that can called from Home Assistant for:
+- `esphome.living_room_av_remote_nec` Used to send an IR commands using the NEC protocol. Two parameters are to be provided when calling the service `address` and `command`.
+- `esphome.living_room_av_remote_pioneer` Used to send an IR commands using the Pioneer protocol. One parameter is to be provided when calling the service `rc_code_1`.
+- `esphome.living_room_av_cdp09` Used to send commands on the the S-Link bys. One parameter is to be provided when calling the service `command`. See the link to www.undeadscientist.com below for the known S-Link commands. 
+
+For each device on the S-Link bus specific sensor will need to be defined in the ESPHome yaml configuration file. This is done using the ESPHome [UARTX custom component](https://github.com/eigger/espcomponents). See the link to www.undeadscientist.com for the expected responses from S-Link devices. The ESPHome yaml configuration file in the 'ESPHome' folder includes the configuration for a CDP-CX225 CD Player, but can be easily adjusted for other Sony devices.
 
 ### Setup for Sony CDP-CX225
 The following template sensors are to be defined in the `configuration.yaml` file:

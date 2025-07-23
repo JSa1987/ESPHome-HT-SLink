@@ -25,16 +25,24 @@ A 3.5 mm mono plug would be used also to connect to most IR blasers and IR input
 
 ## Home Assistant interface
 ### Entities
-The ESPHome device exposes the folloewing services that can called from Home Assistant for:
+The ESPHome device exposes the following entities:
+- `switch.living_room_av_power_conditioner_switch` Switch for the to controll the ON/OFF Output (5v)
+- `binary_sensor.living_room_av_yamaha_receiver_status` Binary Sensor for the 12v ON/OFF Input 
+- `binary_sensor.living_room_av_tv_status` Binary Sensor for the 12v ON/OFF Input 
+- `button.living_room_av_reboot` Button to reboot the ESP8266
+- `button.living_room_av_arduino_reset` Button to reboot the Arduino
+
+The ESPHome device also exposes the folloewing services that can called from Home Assistant:
 - `esphome.living_room_av_remote_nec` Used to send an IR commands using the NEC protocol. Two parameters are to be provided when calling the service `address` and `command`.
 - `esphome.living_room_av_remote_pioneer` Used to send an IR commands using the Pioneer protocol. One parameter is to be provided when calling the service `rc_code_1`.
-- `esphome.living_room_av_cdp09` Used to send commands on the the S-Link bys. One parameter is to be provided when calling the service `command`. See the link to www.undeadscientist.com below for the known S-Link commands. 
+- `esphome.living_room_av_cdp09` Used to send commands on the the S-Link bys. One parameter is to be provided when calling the service `command`. See the link at the bottom of the page for the known S-Link commands.
 
-
+For each device on the S-Link bus specific sensors will then need to be defined in the ESPHome yaml configuration file. This is done using the ESPHome [UARTX custom component](https://github.com/eigger/espcomponents) to process the data received from the Arduino over UART and expose to Home Assistant as entities.
+The ESPHome configuration file in the 'ESPHome' folder includes the configuration for a CDP-CX225 CD Player, but can be easily adjusted for other Sony devices (see the link at the bottom of the page for the expected responses from S-Link devices).
 
 ### Setup for Sony CDP-CX225
-For each device on the S-Link bus specific sensors will need to be defined in the ESPHome yaml configuration file. This is done using the ESPHome [UARTX custom component](https://github.com/eigger/espcomponents). See the link to www.undeadscientist.com for the expected responses from S-Link devices. The ESPHome `configuration.yaml` file in the 'ESPHome' folder includes the configuration for a CDP-CX225 CD Player, but can be easily adjusted for other Sony devices.
-The following template sensors are to be defined in this file:
+
+The following template sensors are to be defined in the Home Assistant `configuration.yaml`:
 - cdp_album => This will reflect the title of the CD loaded.
 - cdp_artist => This will reflect the artist of the track playing
 - cdp_track_title => This will reflect the title of the track playing
@@ -69,6 +77,21 @@ template:
             data:
               jump_to: "{{ value }}"
 ```
+
+In addtion, the following Helpers need to be created in Home Assitant:
+- `input_select.cdp_cd_list` This is used to provide a drop down list to pick the CD to be played
+- `input_select.cdp_cd_tracks` This is used to provide a drop down list to pick the track to be played
+
+The details of the CDs loaded in the CDP-CX225 are defined in the `cdp_cd_list.jinja` file. For each CD this file details the Artist, the Album Name, the Number of Tracks and the Title of each track. An example of this file is provided in the 'Home Assistant' folder. This file needs to be placed in the Home Assistant `custom_templates` sub-folder.
+
+The following Scripts and Automations are provided in the 'Home Assistant' folder:
+- `AV_CDP_Refresh_Album-Track.yaml` Automation triggered each time the track played changes to update `input_select.cdp_cd_list` and `input_select.cdp_cd_tracks` to reflect the CD and track currently been played.
+- `AV_CDP_Power_Toggle.yaml` Script to toggle ON and OFF the power to the CDP-CX225
+- `AV_CDP_JumpTime.yaml` Script to jump to a specific time of the current track
+- `AV_CDP_Play_Disc-Track.yaml` Script to play a specific CD and Track
+- `AV_CDP_Update_CD_List.yaml` Script to load an updated content from the `cdp_cd_list.jinja` file
+
+### Card for Sony CDP-CX225
 
 ### Card for Sony CDP-CX225
 

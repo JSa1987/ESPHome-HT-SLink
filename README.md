@@ -25,15 +25,16 @@ A 3.5 mm mono plug would be used also to connect to most IR blasers and IR input
 
 ## Home Assistant interface
 ### Entities
-The ESPHome device exposes the folloeing services that can called from Home Assistant for:
+The ESPHome device exposes the folloewing services that can called from Home Assistant for:
 - `esphome.living_room_av_remote_nec` Used to send an IR commands using the NEC protocol. Two parameters are to be provided when calling the service `address` and `command`.
 - `esphome.living_room_av_remote_pioneer` Used to send an IR commands using the Pioneer protocol. One parameter is to be provided when calling the service `rc_code_1`.
 - `esphome.living_room_av_cdp09` Used to send commands on the the S-Link bys. One parameter is to be provided when calling the service `command`. See the link to www.undeadscientist.com below for the known S-Link commands. 
 
-For each device on the S-Link bus specific sensor will need to be defined in the ESPHome yaml configuration file. This is done using the ESPHome [UARTX custom component](https://github.com/eigger/espcomponents). See the link to www.undeadscientist.com for the expected responses from S-Link devices. The ESPHome yaml configuration file in the 'ESPHome' folder includes the configuration for a CDP-CX225 CD Player, but can be easily adjusted for other Sony devices.
+
 
 ### Setup for Sony CDP-CX225
-The following template sensors are to be defined in the `configuration.yaml` file:
+For each device on the S-Link bus specific sensor will need to be defined in the ESPHome yaml configuration file. This is done using the ESPHome [UARTX custom component](https://github.com/eigger/espcomponents). See the link to www.undeadscientist.com for the expected responses from S-Link devices. The ESPHome `configuration.yaml` file in the 'ESPHome' folder includes the configuration for a CDP-CX225 CD Player, but can be easily adjusted for other Sony devices.
+The following template sensors are to be defined in this file:
 - cdp_album => This will reflect the title of the CD loaded.
 - cdp_artist => This will reflect the artist of the track playing
 - cdp_track_title => This will reflect the title of the track playing

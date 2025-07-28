@@ -28,7 +28,7 @@ A 3.5 mm mono plug would be used also to connect to most IR blasers and IR input
 The ESPHome device exposes the following entities:
 - `switch.living_room_av_power_conditioner_switch` Switch for the to controll the ON/OFF Output (5v)
 - `binary_sensor.living_room_av_yamaha_receiver_status` Binary Sensor for the 12v ON/OFF Input 
-- `binary_sensor.living_room_av_tv_status` Binary Sensor for the 12v ON/OFF Input 
+- `binary_sensor.living_room_av_tv_status` Binary Sensor for the 5v ON/OFF Input 
 - `button.living_room_av_reboot` Button to reboot the ESP8266
 - `button.living_room_av_arduino_reset` Button to reboot the Arduino
 
@@ -37,7 +37,7 @@ The ESPHome device also exposes the folloewing services that can called from Hom
 - `esphome.living_room_av_remote_pioneer` Used to send an IR commands using the Pioneer protocol. One parameter is to be provided when calling the service `rc_code_1`.
 - `esphome.living_room_av_cdp09` Used to send commands on the the S-Link bys. One parameter is to be provided when calling the service `command`. See the link at the bottom of the page for the known S-Link commands.
 
-For each device on the S-Link bus specific sensors will then need to be defined in the ESPHome yaml configuration file. This is done using the ESPHome [UARTX custom component](https://github.com/eigger/espcomponents) to process the data received from the Arduino over UART and expose to Home Assistant as entities.
+For each device on the S-Link bus specific sensors will then need to be defined in the ESPHome yaml configuration file. This is done using the ESPHome [UARTX custom component](https://github.com/eigger/espcomponents) to process the data received from the Arduino over UART and expose it to Home Assistant as entities.
 The ESPHome configuration file in the 'ESPHome' folder includes the configuration for a CDP-CX225 CD Player, but can be easily adjusted for other Sony devices (see the link at the bottom of the page for the expected responses from S-Link devices).
 
 ### Setup for Sony CDP-CX225

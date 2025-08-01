@@ -92,12 +92,13 @@ The following Scripts and Automations are provided in the 'Home Assistant' folde
 - `AV_CDP_Update_CD_List.yaml` Script to load an updated content from the `cdp_cd_list.jinja` file
 
 ### Card for Sony CDP-CX225
-
-### Card for Sony CDP-CX225
+To control the CDP-CX225 I created a "custom card" based on [Conditional Media Player Card from CollotsSpot](https://github.com/CollotsSpot/Conditional-Media-Player).
 
 ## Additional resources
 The S-Link_CDP-CX225.xlxs file in the 'SLink Supported Commands' folder lists the commands I have found work with the CDP-CX225.
 The ESPHome yaml configuration file I use for my setup is provided as reference in the 'ESPHme' folder. The [UARTX custom component form eigger](https://github.com/eigger/espcomponents) is used to interface with the Arduino managing the S-Link bus.
+
+![card1](Home Assistant/Card Screenshot 1.png)   ![card2](Home Assistant/Card Screenshot 2.png)
 
 ----
 

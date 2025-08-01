@@ -556,26 +556,4 @@ decluttering_templates:
                 - condition: state
                   entity: '[[cd_power_status]]'
                   state: 'on'
-views:
-  - title: 'Living room '
-    path: yamaha-remote
-    badges: []
-    cards:
-      - type: custom:decluttering-card
-        template: cd_player
-        variables:
-          - service_call: esphome.living_room_av_cdp09
-          - power_toggle: script.av_cdp_power_toggle
-          - play_disk_track: script.av_cdp_play_disc_track
-          - cd_status: sensor.living_room_av_cd_status
-          - cd_playing: sensor.living_room_av_cd_playing
-          - track_playing: sensor.living_room_av_playing_track
-          - cd_power_status: binary_sensor.living_room_av_cd_power_status
-          - cd_track_position: sensor.living_room_av_track_positon_s
-          - cd_track_length: sensor.living_room_av_track_length_s
-          - cd_list: input_select.cdp_cd_list
-          - track_list: input_select.cdp_cd_tracks
-          - primary-color: '#6F8081'
-          - secondary-color: rgba(96,114,116,0.6)
-          - button-background-color: rgba(96,114,116,0.2)
 

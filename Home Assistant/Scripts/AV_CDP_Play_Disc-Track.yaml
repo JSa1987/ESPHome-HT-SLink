@@ -1,0 +1,14 @@
+sequence:
+  - action: esphome.living_room_av_cdp09
+    metadata: {}
+    data:
+      command: >
+        {% from 'cdp_cd_list.jinja' import cdp_cd_list %}
+
+        {{ 500000 +
+        (state_attr('input_select.cdp_cd_list','options').index(states('input_select.cdp_cd_list'))
+        + 1 ) * 100 +
+        (state_attr('input_select.cdp_cd_tracks','options').index(states('input_select.cdp_cd_tracks'))
+        + 1 )}}  
+alias: AV_CDP_Play_Disc-Track
+description: ""

@@ -1,0 +1,581 @@
+resources:
+  - url: /local/decluttering-card.js
+    type: module
+decluttering_templates:
+  cd_player:
+    default: null
+    card:
+      type: custom:layout-card
+      layout_type: custom:vertical-layout
+      layout: {}
+      cards:
+        - type: custom:button-card
+          show_entity_picture: true
+          show_name: false
+          show_icon: false
+          custom_fields:
+            header:
+              card:
+                type: custom:button-card
+                custom_fields:
+                  empty:
+                    card:
+                      type: custom:button-card
+                      icon: mdi:disc
+                      show_name: false
+                      styles:
+                        icon:
+                          - width: 24px
+                          - color: '[[primary-color]]'
+                        card:
+                          - width: 33px
+                          - height: 33px
+                          - border-radius: 99px
+                          - border-width: 0px
+                          - box-shadow: none
+                  status:
+                    card:
+                      type: custom:button-card
+                      tap_action:
+                        action: none
+                      name: |
+                        [[[
+                          if (states['[[cd_status]]'].state == "Playing" || states['[[cd_status]]'].state == "Paused") {
+                            return `${states['[[cd_status]]'].state + " - Disc " + ~~states['[[cd_playing]]'].state + " Track " + ~~states['[[track_playing]]'].state}`;
+                          } else {
+                            return `${states['[[cd_status]]'].state}`;
+                          }
+                        ]]]
+                      show_label: true
+                      show_icon: false
+                      styles:
+                        card:
+                          - box-shadow: none
+                          - background: none
+                          - padding: 0px
+                          - border-radius: 0px
+                          - border-width: 0px
+                        name:
+                          - justify-self: stretch
+                          - line-height: 23px
+                          - font-size: 16px
+                          - font-weight: 500
+                          - color: '[[primary-color]]'
+                  power:
+                    card:
+                      type: custom:button-card
+                      icon: mdi:power
+                      show_name: false
+                      tap_action:
+                        action: call-service
+                        service: '[[power_toggle]]'
+                      styles:
+                        icon:
+                          - width: 24px
+                          - color: '[[primary-color]]'
+                        card:
+                          - width: 33px
+                          - height: 33px
+                          - border-radius: 99px
+                          - border-width: 0px
+                          - box-shadow: none
+                          - background: '[[button-background-color]]'
+                styles:
+                  grid:
+                    - grid-template-columns: 1fr 5fr 1fr;
+                    - grid-template-rows: min-content;
+                    - grid-template-areas: '"empty status power"'
+                    - justify-items: center
+                  card:
+                    - padding: 0 0 0 8px
+                    - align-self: end
+                    - background: none
+                    - box-shadow: none
+                    - border-width: 0px
+                    - margin: 6px 0px 6px 0px
+            artist:
+              card:
+                type: custom:button-card
+                tap_action:
+                  action: none
+                name: |
+                  [[[
+                    if (states['[[cd_status]]'].state == "Playing" || states['[[cd_status]]'].state == "Paused") {
+                       return `${states['sensor.cd_artist'].state}`;
+                    }
+                  ]]]
+                show_label: true
+                show_icon: false
+                styles:
+                  card:
+                    - box-shadow: none
+                    - background: none
+                    - padding: 0px
+                    - border-radius: 0px
+                    - border-width: 0px
+                  name:
+                    - justify-self: stretch
+                    - line-height: 23px
+                    - font-size: 22px
+                    - font-weight: bold
+                    - color: '[[primary-color]]'
+            album:
+              card:
+                type: custom:button-card
+                tap_action:
+                  action: none
+                name: |
+                  [[[
+                    if (states['[[cd_status]]'].state == "Playing" || states['[[cd_status]]'].state == "Paused") {
+                      return `${states['sensor.cd_album'].state}`;
+                    }
+                  ]]]
+                show_icon: false
+                styles:
+                  card:
+                    - box-shadow: none
+                    - background: none
+                    - padding: 0px
+                    - border-radius: 0px
+                    - border-width: 0px
+                  name:
+                    - justify-self: stretch
+                    - line-height: 21px
+                    - font-size: 19px
+                    - font-weight: 500
+                    - color: '[[secondary-color]]'
+            title:
+              card:
+                type: custom:button-card
+                tap_action:
+                  action: none
+                name: |
+                  [[[
+                    if (states['[[cd_status]]'].state == "Playing" || states['[[cd_status]]'].state == "Paused") {
+                      return `<marquee>${states['sensor.cd_track_title'].state}<\marquee>`;
+                    }
+                  ]]]
+                show_icon: false
+                styles:
+                  card:
+                    - box-shadow: none
+                    - background: none
+                    - padding: 0px
+                    - border-radius: 0px
+                    - border-width: 0px
+                  name:
+                    - justify-self: stretch
+                    - font-size: 19px
+                    - font-weight: 500
+                    - color: '[[primary-color]]'
+            buttons:
+              card:
+                type: conditional
+                conditions:
+                  - entity: '[[cd_power_status]]'
+                    state: 'on'
+                card:
+                  type: custom:button-card
+                  custom_fields:
+                    play:
+                      card:
+                        type: custom:button-card
+                        tap_action:
+                          action: call-service
+                          service: '[[service_call]]'
+                          data:
+                            command: '00'
+                        icon: mdi:play
+                        show_name: false
+                        styles:
+                          card:
+                            - width: 33px
+                            - height: 33px
+                            - border-radius: 99px
+                            - border-width: 0px
+                            - box-shadow: none
+                            - background: '[[button-background-color]]'
+                          icon:
+                            - width: 26px
+                            - color: '[[primary-color]]'
+                    pause:
+                      card:
+                        type: custom:button-card
+                        tap_action:
+                          action: call-service
+                          service: '[[service_call]]'
+                          data:
+                            command: '02'
+                        icon: mdi:pause
+                        state: null
+                        show_name: false
+                        styles:
+                          card:
+                            - width: 33px
+                            - height: 33px
+                            - border-radius: 99px
+                            - border-width: 0px
+                            - box-shadow: none
+                            - background: '[[button-background-color]]'
+                          icon:
+                            - width: 26px
+                            - color: '[[primary-color]]'
+                    stop:
+                      card:
+                        type: custom:button-card
+                        tap_action:
+                          action: call-service
+                          service: '[[service_call]]'
+                          data:
+                            command: '01'
+                        icon: mdi:stop
+                        show_name: false
+                        styles:
+                          card:
+                            - width: 33px
+                            - height: 33px
+                            - border-radius: 99px
+                            - border-width: 0px
+                            - box-shadow: none
+                            - background: '[[button-background-color]]'
+                          icon:
+                            - width: 26px
+                            - color: '[[primary-color]]'
+                    rewind:
+                      card:
+                        type: custom:button-card
+                        tap_action:
+                          action: call-service
+                          service: '[[service_call]]'
+                          data:
+                            command: '11'
+                        icon: mdi:rewind
+                        show_name: false
+                        styles:
+                          card:
+                            - width: 33px
+                            - height: 33px
+                            - border-radius: 99px
+                            - border-width: 0px
+                            - box-shadow: none
+                            - background: '[[button-background-color]]'
+                          icon:
+                            - width: 26px
+                            - color: '[[primary-color]]'
+                    fastforward:
+                      card:
+                        type: custom:button-card
+                        tap_action:
+                          action: call-service
+                          service: '[[service_call]]'
+                          data:
+                            command: '10'
+                        icon: mdi:fast-forward
+                        show_name: false
+                        styles:
+                          card:
+                            - width: 33px
+                            - height: 33px
+                            - border-radius: 99px
+                            - border-width: 0px
+                            - box-shadow: none
+                            - background: '[[button-background-color]]'
+                          icon:
+                            - width: 26px
+                            - color: '[[primary-color]]'
+                    previous:
+                      card:
+                        type: custom:button-card
+                        tap_action:
+                          action: call-service
+                          service: '[[service_call]]'
+                          data:
+                            command: '09'
+                        icon: mdi:skip-previous
+                        show_name: false
+                        styles:
+                          card:
+                            - width: 33px
+                            - height: 33px
+                            - border-radius: 99px
+                            - border-width: 0px
+                            - box-shadow: none
+                            - background: '[[button-background-color]]'
+                          icon:
+                            - width: 26px
+                            - color: '[[primary-color]]'
+                    next:
+                      card:
+                        type: custom:button-card
+                        tap_action:
+                          action: call-service
+                          service: '[[service_call]]'
+                          data:
+                            command: '08'
+                        icon: mdi:skip-next
+                        show_name: false
+                        styles:
+                          card:
+                            - width: 33px
+                            - height: 33px
+                            - border-radius: 99px
+                            - border-width: 0px
+                            - box-shadow: none
+                            - background: '[[button-background-color]]'
+                          icon:
+                            - width: 24px
+                            - color: '[[primary-color]]'
+                  styles:
+                    grid:
+                      - grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+                      - grid-template-rows: min-content;
+                      - grid-template-areas: '"play pause stop rewind fastforward  previous next"'
+                      - justify-items: center
+                    card:
+                      - padding: 0 0 0 8px
+                      - align-self: end
+                      - background: none
+                      - box-shadow: none
+                      - border-width: 0px
+                      - margin: 6px 0px 6px 0px
+            time:
+              card:
+                type: conditional
+                conditions:
+                  - entity: '[[cd_power_status]]'
+                    state: 'on'
+                card:
+                  type: custom:button-card
+                  custom_fields:
+                    progress:
+                      card:
+                        type: custom:button-card
+                        show_name: true
+                        name: |
+                          [[[
+                            const mp = parseInt(states['[[cd_track_position]]'].state);    
+                            if (mp === undefined) {
+                              return '00:00';
+                            } else if (mp < 3600) {
+                              return new Date(mp * 1000).toISOString().substr(14, 5);
+                            } else {
+                              return new Date(mp * 1000).toLocaleTimeString([], { hour12: false, hour: 'numeric', minute: '2-digit', second: '2-digit' });
+                            }
+                          ]]]
+                        styles:
+                          card:
+                            - background: none
+                            - border-radius: 0
+                            - box-shadow: none
+                            - margin: 0 0 0 0
+                            - border-width: 0px
+                          name:
+                            - color: '[[primary-color]]'
+                            - font-weight: 550
+                            - font-size: 16px
+                    remaining:
+                      card:
+                        type: custom:button-card
+                        show_name: true
+                        name: |
+                          [[[
+                            const md = parseInt(states['[[cd_track_length]]'].state);
+                            const mp = parseInt(states['[[cd_track_position]]'].state);
+                            if (md === undefined || mp === undefined) {
+                            return '-00:00 |';
+                            }
+                            const remainingTime = Math.max(md - mp, 0); // Ensures non-negative time
+                            let remainingTimeStr;
+                            if (remainingTime < 3600) {
+                            remainingTimeStr = new Date(remainingTime * 1000).toISOString().substr(14, 5);
+                            } else {
+                            remainingTimeStr = new Date(remainingTime * 1000).toLocaleTimeString([], { hour12: false, hour: 'numeric', minute: '2-digit', second: '2-digit' });
+                            }
+                            return `-${remainingTimeStr} |`;
+                          ]]]
+                        styles:
+                          card:
+                            - background: none
+                            - border-radius: 0
+                            - box-shadow: none
+                            - margin: 0 8px 0 0
+                            - border-width: 0px
+                          name:
+                            - color: '[[secondary-color]]'
+                            - font-weight: 550
+                            - font-size: 16px
+                    duration:
+                      card:
+                        type: custom:button-card
+                        show_name: true
+                        name: |
+                          [[[
+                            const md = parseInt(states['[[cd_track_length]]'].state);
+                            if (md === undefined) {
+                              return '00:00';
+                            } else if (md < 3600) {
+                              return new Date(md * 1000).toISOString().substr(14, 5);
+                            } else {
+                              return new Date(md * 1000).toLocaleTimeString([], { hour12: false, hour: 'numeric', minute: '2-digit', second: '2-digit' });
+                            }
+                          ]]]
+                        styles:
+                          card:
+                            - background: none
+                            - border-radius: 0
+                            - box-shadow: none
+                            - margin: 0 0 0 0
+                            - border-width: 0px
+                          name:
+                            - color: '[[primary-color]]'
+                            - font-weight: 550
+                            - font-size: 16px
+                    track:
+                      card:
+                        type: custom:my-slider-v2
+                        entity: number.cdp_track_bar
+                        mode: seekbar
+                        min: 0
+                        max: 100
+                        styles:
+                          card:
+                            - height: 20px
+                            - box-shadow: none
+                            - margin: 0 0 0 0
+                            - background: none
+                          container:
+                            - border-radius: 0px
+                            - background: none
+                            - padding: 0 0 0 10px
+                          track:
+                            - background: '[[button-background-color]]'
+                            - border-radius: 99px
+                            - padding: 0 0px 0 0px
+                            - width: 92%
+                            - height: 7px
+                            - margin: 6px 0 0 0
+                          progress:
+                            - background: '[[primary-color]]'
+                            - border-radius: 99px
+                            - height: 7px
+                            - margin: 0 0 0 0
+                          thumb:
+                            - background: '[[primary-color]]'
+                            - width: 15px
+                            - height: 15px
+                            - border-radius: 99px
+                            - margin: '-4px -3px 0 0px'
+                  styles:
+                    grid:
+                      - grid-template-areas: '"progress track remaining duration"'
+                      - grid-template-columns: max-content 1fr max-content max-content
+                      - grid-template-rows: min-content
+                    card:
+                      - padding: 5px 10px 5px 5px
+                      - background: none
+                      - box-shadow: none
+          styles:
+            grid:
+              - grid-template-areas: '"header" "artist" "album" "title" "time" "buttons"'
+              - grid-template-columns: 1fr;
+              - grid-template-rows: >-
+                  max-content max-content max-content max-content max-content
+                  max-content;
+              - align-items: end
+            card:
+              - background: none
+              - box-shadow: none
+              - border-radius: 0px
+              - border-width: 0px
+              - padding: 0px 0px 0 5px
+              - margin: 5px 0 -10px 0
+            entity_picture:
+              - align-self: start
+              - justify-self: start
+              - width: 110px
+              - height: 100%
+              - border-radius: 15px
+        - type: conditional
+          conditions:
+            - condition: state
+              entity: '[[cd_power_status]]'
+              state: 'on'
+          card:
+            type: custom:layout-card
+            layout_type: custom:grid-layout
+            cards:
+              - type: custom:layout-card
+                layout_type: custom:vertical-layout
+                layout: {}
+                cards:
+                  - type: custom:mushroom-select-card
+                    entity: '[[cd_list]]'
+                    layout: horizontal
+                    primary_info: none
+                    secondary_info: none
+                    fill_container: false
+                    card_mod:
+                      style: |
+                        ha-card {
+                          background: none;
+                          border: none;
+                        }
+                    icon_color: disabled
+                  - type: custom:mushroom-select-card
+                    entity: '[[track_list]]'
+                    layout: horizontal
+                    primary_info: none
+                    secondary_info: none
+                    card_mod:
+                      style: |
+                        ha-card {
+                          background: none;
+                          border: none;
+                        }
+                    icon_color: disabled
+              - show_name: false
+                show_icon: true
+                type: button
+                entity: '[[play_disk_track]]'
+                show_state: false
+                icon: mdi:arrow-right-bold-circle
+                tap_action:
+                  action: perform-action
+                  perform_action: '[[play_disk_track]]'
+                  target: {}
+                hold_action:
+                  action: none
+            visibility:
+              - condition: state
+                entity: '[[cd_power_status]]'
+                state: 'on'
+            layout:
+              grid-template-columns: 85% 15%
+              margin: 0px 0px 0px 0px
+              visibility:
+                - condition: state
+                  entity: '[[cd_power_status]]'
+                  state: 'on'
+views:
+  - title: 'Living room '
+    path: yamaha-remote
+    badges: []
+    cards:
+      - type: custom:decluttering-card
+        template: cd_player
+        variables:
+          - service_call: esphome.living_room_av_cdp09
+          - power_toggle: script.av_cdp_power_toggle
+          - play_disk_track: script.av_cdp_play_disc_track
+          - cd_status: sensor.living_room_av_cd_status
+          - cd_playing: sensor.living_room_av_cd_playing
+          - track_playing: sensor.living_room_av_playing_track
+          - cd_power_status: binary_sensor.living_room_av_cd_power_status
+          - cd_track_position: sensor.living_room_av_track_positon_s
+          - cd_track_length: sensor.living_room_av_track_length_s
+          - cd_list: input_select.cdp_cd_list
+          - track_list: input_select.cdp_cd_tracks
+          - primary-color: '#6F8081'
+          - secondary-color: rgba(96,114,116,0.6)
+          - button-background-color: rgba(96,114,116,0.2)
+

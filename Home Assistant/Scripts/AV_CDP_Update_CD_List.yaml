@@ -1,0 +1,15 @@
+sequence:
+  - action: input_select.set_options
+    metadata: {}
+    data:
+      options: |
+        {% from "cdp_cd_list.jinja" import cdp_cd_list %}
+        {% set list = namespace(album=[]) %}
+        {% for cd in cdp_cd_list.cd %}
+        {% set list.album = list.album  + [cd.Artist + " - " + cd.Album] %}
+        {% endfor %}
+        {{list.album }}
+    target:
+      entity_id: input_select.cdp_cd_list
+alias: AV_CDP_Update_CD_List
+description: ""

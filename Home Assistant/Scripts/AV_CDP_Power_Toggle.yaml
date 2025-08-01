@@ -1,0 +1,18 @@
+sequence:
+  - if:
+      - condition: state
+        entity_id: binary_sensor.living_room_av_cd_power_status
+        state: "on"
+    then:
+      - action: esphome.living_room_av_cdp09
+        metadata: {}
+        data:
+          command: 2F
+    else:
+      - action: esphome.living_room_av_cdp09
+        metadata: {}
+        data:
+          command: 2E
+alias: AV_CDP_Power_Toggle
+description: ""
+

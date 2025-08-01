@@ -1,0 +1,34 @@
+alias: AV_CDP_Refresh_Album-Track
+description: ""
+triggers:
+  - trigger: state
+    entity_id:
+      - sensor.living_room_av_playing_track
+conditions: []
+actions:
+  - action: input_select.select_option
+    metadata: {}
+    data:
+      option: >
+        {% from "cdp_cd_list.jinja" import cdp_cd_list %} {{
+        cdp_cd_list.cd[(states('sensor.living_room_av_cd_playing')|int
+        -1)].Artist + " - " +
+        cdp_cd_list.cd[(states('sensor.living_room_av_cd_playing')|int
+        -1)].Album }}
+    target:
+      entity_id: input_select.cdp_cd_list
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 0
+  - action: input_select.select_option
+    metadata: {}
+    data:
+      option: |
+        {% from "cdp_cd_list.jinja" import cdp_cd_list %} {{
+        cdp_cd_list.cd[(states('sensor.living_room_av_cd_playing')|int
+        -1)].Tracks[(states('sensor.living_room_av_playing_track')|int -1)] }}
+    target:
+      entity_id: input_select.cdp_cd_tracks
+mode: single

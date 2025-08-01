@@ -1,0 +1,42 @@
+sequence:
+  - if:
+      - condition: template
+        value_template: >-
+          {{ jump_to > ((states('sensor.living_room_av_track_positon_s')|int) /
+          (states('sensor.living_room_av_track_length_s')|int)) * 100}}
+    then:
+      - action: esphome.living_room_av_cdp09
+        metadata: {}
+        data:
+          command: "10"
+      - wait_template: >-
+          {{ jump_to <= ((states('sensor.living_room_av_track_positon_s')|int) /
+          (states('sensor.living_room_av_track_length_s')|int)) * 100}}
+        continue_on_timeout: true
+      - action: esphome.living_room_av_cdp09
+        metadata: {}
+        data:
+          command: "00"
+    else:
+      - action: esphome.living_room_av_cdp09
+        metadata: {}
+        data:
+          command: "11"
+      - wait_template: >-
+          {{ jump_to >= ((states('sensor.living_room_av_track_positon_s')|int) /
+          (states('sensor.living_room_av_track_length_s')|int)) * 100}}
+        continue_on_timeout: true
+      - action: esphome.living_room_av_cdp09
+        metadata: {}
+        data:
+          command: "00"
+alias: AV_CDP_JumpTime
+description: ""
+fields:
+  jump_to:
+    selector:
+      number:
+        min: 1
+        max: 100
+        step: 1
+    name: jump_to
